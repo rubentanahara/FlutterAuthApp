@@ -17,7 +17,7 @@ https://github.com/user-attachments/assets/093c8512-d073-4a81-93d7-cc18ba3667be
 
 ## 🚀 Quick Setup
 
-### 1. Backend Setup (.NET API)
+### 1.1 Backend Setup (.NET API)
 
 ```bash
 # Navigate to backend
@@ -37,6 +37,15 @@ dotnet ef database update
 
 # Start backend server
 dotnet run
+```
+
+### 1.2 Docker compose
+
+```bash
+# Navigate to backend
+cd backend/AuthauthenticationAPI
+
+docker-compose up
 ```
 
 **Backend will run at:**
