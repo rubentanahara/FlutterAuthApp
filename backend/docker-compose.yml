@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  auth-api:
+    build:
+      context: ./AuthauthenticationAPI
+      dockerfile: Dockerfile
+    container_name: auth-api
+    ports:
+      - "5062:5062"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5062
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/AuthDB.db
+      - Jwt__Key=mnbvcxzasdfghjklpoiuytrewqsdfghjkmbvcxsrtyuiolmnbvcxsertyuiudsxcvbnliuydsxcvbnkloiuytrdhjnbxdfghjkmnxdfghjdfghjkmnxcvbndfghxcvbgh
+      - Jwt__Issuer=AuthAPI
+      - Jwt__Audience=AuthApp
+      - Jwt__ExpiryMinutes=60
+    volumes:
+      - auth-data:/app/data
+    networks:
+      - auth-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5062/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  auth-data:
+    driver: local
+
+networks:
+  auth-network:
+    driver: bridge

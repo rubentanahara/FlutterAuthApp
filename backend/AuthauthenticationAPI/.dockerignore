@@ -1,0 +1,61 @@
+# Build artifacts
+bin/
+obj/
+out/
+
+# IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+README*
+
+# Docker files (we only need the Dockerfile itself)
+docker-compose*.yml
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# Runtime files
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+TestResults/
+*.trx
+*.coverage
+
+# Local environment
+.env
+.env.local
+.env.*.local
+
+# Database files (will be managed separately)
+*.db
+*.db-shm
+*.db-wal
+
+# Temporary files
+*.tmp
+*.temp

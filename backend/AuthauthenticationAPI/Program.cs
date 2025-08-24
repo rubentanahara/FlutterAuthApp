@@ -1,8 +1,10 @@
 using AuthauthenticationAPI.Data;
 using AuthauthenticationAPI.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -55,12 +57,34 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["ready"]);
 
 
 var app = builder.Build();
+
+// Ensure database is created and migrations are applied
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    
+    // Ensure the database directory exists
+    var connectionString = context.Database.GetConnectionString();
+    if (!string.IsNullOrEmpty(connectionString) && connectionString.Contains("Data Source="))
+    {
+        var dbPath = connectionString.Split("Data Source=")[1].Split(';')[0];
+        var dbDirectory = Path.GetDirectoryName(dbPath);
+        if (!string.IsNullOrEmpty(dbDirectory) && !Directory.Exists(dbDirectory))
+        {
+            Directory.CreateDirectory(dbDirectory);
+        }
+    }
+    
+    // Apply any pending migrations and create database if it doesn't exist
+    await context.Database.EnsureCreatedAsync();
+    
+    // Create roles after database is ready
     await CreateRoles.CreateRolesAsync(services);
 }
 // Configure the HTTP request pipeline.
@@ -79,5 +103,28 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+// Map health check endpoint
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    Predicate = _ => true,
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var response = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description
+            }),
+            duration = report.TotalDuration
+        };
+        await context.Response.WriteAsJsonAsync(response);
+    }
+});
 
 app.Run();
