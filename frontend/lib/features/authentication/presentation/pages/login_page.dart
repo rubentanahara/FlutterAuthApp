@@ -94,6 +94,8 @@ class LoginPage extends ConsumerWidget {
               const SizedBox(height: 24),
 
               // Login button
+              // We cannot use const here because authState.isLoading is dynamic
+              // and changes based on user interaction
               ElevatedButton(
                 onPressed: authState.isLoading 
                     ? null 

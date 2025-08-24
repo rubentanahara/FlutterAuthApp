@@ -12,6 +12,8 @@ void main() async {
   // Initialize SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
   // Initialize AuthService with SharedPreferences
+  // overrides array is used to inject dependencies
+  // so that we can easily mock them in tests
   runApp(
     ProviderScope(
       overrides: [
@@ -25,11 +27,11 @@ void main() async {
 class AuthApp extends ConsumerWidget {
   const AuthApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);
+
     return MaterialApp.router(
       title: 'Auth app',
 

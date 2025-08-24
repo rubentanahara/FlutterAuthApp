@@ -8,6 +8,9 @@ import '../models/auth_models.dart';
 
 part 'auth_service.g.dart';
 
+// Is this singleton?
+// Yes, by using Riverpod's provider system, the Dio instance and SharedPreferences instance are effectively singletons within the scope of the application. This means that whenever you access these providers,
+// you will get the same instance throughout the app's lifecycle.
 @riverpod
 Dio dio(Ref ref) {
   final dio = Dio(
@@ -24,11 +27,7 @@ Dio dio(Ref ref) {
 
   // Add interceptors for logging and error handling
   dio.interceptors.add(
-    LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      error: true,
-    ),
+    LogInterceptor(requestBody: true, responseBody: true, error: true),
   );
 
   return dio;
@@ -36,15 +35,15 @@ Dio dio(Ref ref) {
 
 @riverpod
 SharedPreferences sharedPreferences(Ref ref) {
+  // Provider Scope in main.dart ensures initialization
+  // so this should never be called before initialization
   throw UnimplementedError('SharedPreferences must be initialized');
 }
 
 @riverpod
 class AuthService extends _$AuthService {
   @override
-  void build() {
-    // Initial state - no return value needed for void
-  }
+  void build() {}
 
   Future<LoginResponse> login(LoginRequest request) async {
     try {
@@ -55,20 +54,20 @@ class AuthService extends _$AuthService {
       );
 
       final loginResponse = LoginResponse.fromJson(response.data);
-      
+
       if (loginResponse.success && loginResponse.result != null) {
         // Store the token
         final prefs = ref.read(sharedPreferencesProvider);
-        await prefs.setString(AppConstants.accessTokenKey, loginResponse.result!);
+        await prefs.setString(
+          AppConstants.accessTokenKey,
+          loginResponse.result!,
+        );
       }
-      
+
       return loginResponse;
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        return const LoginResponse(
-          success: false,
-          result: null,
-        );
+        return const LoginResponse(success: false, result: null);
       }
       rethrow;
     }
@@ -109,18 +108,5 @@ class AuthService extends _$AuthService {
   Future<void> storeUserData(User user) async {
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setString(AppConstants.userDataKey, user.toJson().toString());
-  }
-
-  Future<User?> getStoredUserData() async {
-    final prefs = ref.read(sharedPreferencesProvider);
-    final userData = prefs.getString(AppConstants.userDataKey);
-    if (userData != null) {
-      try {
-        return null;
-      } catch (e) {
-        return null;
-      }
-    }
-    return null;
   }
 }
