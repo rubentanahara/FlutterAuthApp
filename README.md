@@ -1,5 +1,11 @@
 # Auth App - Flutter & .NET
 
+# Demo
+
+https://github.com/user-attachments/assets/093c8512-d073-4a81-93d7-cc18ba3667be
+
+--- 
+
 ## Prerequisites
 
 ### Backend (.NET)
